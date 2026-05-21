@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Striver A2Z — DSA Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#080b10;--bg2:#0d1117;--border:#1a2436;--border2:#243044;--txt:#cdd9e5;--txt2:#768a9e;--txt3:#3d5166;--accent:#39d353;--mono:'JetBrains Mono',monospace;--display:'Syne',sans-serif}
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--txt);font-family:var(--mono);font-size:13px;line-height:1.5;min-height:100vh}
+  #header{position:sticky;top:0;z-index:200;background:rgba(8,11,16,.96);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);padding:16px 20px 14px}
+  .header-inner{max-width:860px;margin:0 auto}
+  .header-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+  .brand-tag{font-size:10px;color:var(--accent);letter-spacing:4px;text-transform:uppercase;margin-bottom:3px}
+  .brand-title{font-family:var(--display);font-size:20px;font-weight:800;color:#eaf2f8;letter-spacing:-.5px}
+  .global-pct{font-family:var(--display);font-size:30px;font-weight:800;color:var(--accent);line-height:1;text-align:right}
+  .global-sub{font-size:10px;color:var(--txt3);margin-top:2px;text-align:right;letter-spacing:1px}
+  .gbar-wrap{margin-top:12px;height:3px;background:var(--border);border-radius:99px;overflow:hidden}
+  .gbar-fill{height:100%;background:linear-gradient(90deg,var(--accent),#58a6ff);border-radius:99px;transition:width .5s}
+  .filter-row{display:flex;align-items:center;gap:6px;margin-top:12px}
+  .filter-btn{padding:3px 11px;border-radius:5px;border:1px solid var(--border2);background:transparent;color:var(--txt3);font-size:10px;font-family:var(--mono);letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;transition:all .15s}
+  .filter-btn:hover{border-color:var(--txt3);color:var(--txt2)}
+  .filter-btn.active{border-color:var(--accent);background:rgba(57,211,83,.08);color:var(--accent)}
+  .save-dot{margin-left:auto;font-size:10px;color:var(--txt3);letter-spacing:1px;transition:color .3s}
+  .save-dot.live{color:var(--accent)}
+  main{max-width:860px;margin:0 auto;padding:16px 16px 60px}
+  .phase{border:1px solid var(--border);border-radius:10px;margin-bottom:10px;overflow:hidden;transition:border-color .2s}
+  .phase.open{border-color:color-mix(in srgb,var(--phase-color) 40%,transparent)}
+  .phase-hdr{display:flex;align-items:center;gap:12px;padding:13px 16px;cursor:pointer;user-select:none;transition:background .15s}
+  .phase-hdr:hover{background:rgba(255,255,255,.02)}
+  .phase.open .phase-hdr{background:color-mix(in srgb,var(--phase-color) 6%,transparent)}
+  .phase-emoji{font-size:18px;line-height:1;flex-shrink:0}
+  .phase-info{flex:1;min-width:0}
+  .phase-name{font-family:var(--display);font-size:13px;font-weight:700;color:#eaf2f8;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .bonus-badge{font-size:9px;font-family:var(--mono);padding:1px 7px;border-radius:99px;background:rgba(168,85,247,.15);color:#c084fc;border:1px solid rgba(168,85,247,.3);letter-spacing:1px}
+  .phase-meta{font-size:11px;color:var(--txt3);margin-top:2px}
+  .phase-right{display:flex;align-items:center;gap:10px;flex-shrink:0}
+  .phase-bar-wrap{width:72px;height:3px;background:var(--border);border-radius:99px;overflow:hidden}
+  .phase-bar-fill{height:100%;background:var(--phase-color);border-radius:99px;transition:width .3s}
+  .phase-pct{font-size:11px;color:var(--phase-color);width:32px;text-align:right}
+  .phase-chev{font-size:11px;color:var(--txt3);transition:transform .2s}
+  .phase.open .phase-chev{transform:rotate(180deg)}
+  .sections{display:none}
+  .phase.open .sections{display:block}
+  .section{border-top:1px solid var(--border)}
+  .sec-hdr{display:flex;align-items:center;gap:10px;padding:9px 16px 9px 42px;cursor:pointer;user-select:none;transition:background .15s}
+  .sec-hdr:hover{background:rgba(255,255,255,.015)}
+  .sec-check{width:15px;height:15px;border-radius:3px;border:1.5px solid var(--border2);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:9px;transition:all .15s}
+  .sec-check.done{border-color:var(--phase-color);background:color-mix(in srgb,var(--phase-color) 20%,transparent);color:var(--phase-color)}
+  .sec-info{flex:1;min-width:0}
+  .sec-day{font-size:11px;color:var(--txt2)}
+  .sec-label{font-size:11px;color:var(--txt3);margin-left:6px}
+  .sec-count{font-size:11px;color:var(--txt3);flex-shrink:0}
+  .sec-chev{font-size:10px;color:var(--txt3);transition:transform .2s}
+  .sec-hdr.open .sec-chev{transform:rotate(180deg)}
+  .tasks{display:none;padding:4px 16px 10px 42px}
+  .tasks.open{display:block}
+  .task{display:flex;align-items:flex-start;gap:9px;padding:5px 8px;border-radius:5px;cursor:pointer;margin-bottom:1px;transition:background .12s}
+  .task:hover{background:rgba(255,255,255,.03)}
+  .task.done{background:color-mix(in srgb,var(--phase-color) 5%,transparent)}
+  .task-box{width:14px;height:14px;border-radius:3px;border:1.5px solid var(--border2);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;font-size:8px;font-weight:900;transition:all .12s}
+  .task.done .task-box{border-color:var(--phase-color);background:var(--phase-color);color:#080b10}
+  .task-body{flex:1;display:flex;align-items:flex-start;justify-content:space-between;gap:8px;flex-wrap:wrap}
+  .task-txt{font-size:12px;color:var(--txt2);line-height:1.55;transition:all .12s}
+  .task.done .task-txt{color:var(--txt3);text-decoration:line-through;text-decoration-color:var(--txt3)}
+  .task-links{display:flex;gap:4px;flex-shrink:0;margin-top:1px}
+  .lc-badge,.gfg-badge{font-size:9px;padding:1px 7px;border-radius:3px;text-decoration:none;font-family:var(--mono);letter-spacing:.5px;white-space:nowrap;transition:opacity .15s;opacity:.75}
+  .lc-badge{background:rgba(255,161,22,.12);color:#ffa116;border:1px solid rgba(255,161,22,.25)}
+  .gfg-badge{background:rgba(34,197,94,.1);color:#22c55e;border:1px solid rgba(34,197,94,.2)}
+  .lc-badge:hover,.gfg-badge:hover{opacity:1}
+  .task.done .task-links{opacity:.4}
+  .empty-msg{padding:10px 0 8px;font-size:11px;color:var(--txt3);font-style:italic}
+  footer{text-align:center;padding:20px 0 0;font-size:10px;color:var(--border2);letter-spacing:2px}
+</style>
+</head>
+<body>
+<div id="header">
+  <div class="header-inner">
+    <div class="header-top">
+      <div><div class="brand-tag">Striver A2Z DSA</div><div class="brand-title">Progress Tracker</div></div>
+      <div><div class="global-pct" id="gPct">0%</div><div class="global-sub" id="gSub">0 / 0 tasks</div></div>
+    </div>
+    <div class="gbar-wrap"><div class="gbar-fill" id="gBar" style="width:0%"></div></div>
+    <div class="filter-row">
+      <button class="filter-btn active" data-f="all">All</button>
+      <button class="filter-btn" data-f="pending">Pending</button>
+      <button class="filter-btn" data-f="done">Done</button>
+      <span class="save-dot" id="saveDot">● saved</span>
+    </div>
+  </div>
+</div>
+<main id="main"></main>
+<script>
+const LC="lc",GFG="gfg";
+function lc(s){return{t:LC,u:"https://leetcode.com/problems/"+s+"/"}}
+function gfg(s){return{t:GFG,u:"https://practice.geeksforgeeks.org/problems/"+s}}
+function gfg2(s){return{t:GFG,u:"https://www.geeksforgeeks.org/"+s}}
+
+const PHASES=[
+{id:"p1",e:"🧱",title:"Foundations — Basics & Sorting",days:"Days 1–5",color:"#f97316",sections:[
+  {id:"s1",day:"Day 1–2",label:"Time & Space Complexity + Basic Math",tasks:[
+    {t:"Understand Big-O notation & time complexity"},
+    {t:"Understand space complexity"},
+    {t:"GCD / LCM problems",links:[gfg("gcd-lcm-hcf-of-two-numbers3459/1")]},
+    {t:"Prime check & Sieve of Eratosthenes",links:[lc("count-primes")]},
+    {t:"Count digits, reverse number, Armstrong numbers",links:[gfg2("program-for-sum-of-digits/")]},
+    {t:"Perfect numbers & sum of divisors",links:[gfg("perfect-numbers3207/1")]},
+    {t:"Print all divisors of a number",links:[gfg("sum-of-all-divisors-from-1-to-n4738/1")]},
+  ]},
+  {id:"s2",day:"Day 3–4",label:"Patterns, Recursion Intro & Hashing",tasks:[
+    {t:"Star/number patterns (triangles, pyramids, diamonds)"},
+    {t:"Recursion: print 1 to N and N to 1"},
+    {t:"Recursion: factorial & fibonacci",links:[lc("fibonacci-number")]},
+    {t:"Hashing: frequency maps using arrays"},
+    {t:"Hashing: frequency maps using maps"},
+    {t:"Count distinct elements"},
+    {t:"Count frequency of each element"},
+  ]},
+  {id:"s3",day:"Day 5",label:"All Sorting Algorithms",tasks:[
+    {t:"Selection Sort",links:[gfg("selection-sort/1")]},
+    {t:"Bubble Sort",links:[gfg("bubble-sort/1")]},
+    {t:"Insertion Sort",links:[gfg("insertion-sort/1")]},
+    {t:"Merge Sort",links:[gfg("merge-sort/1")]},
+    {t:"Quick Sort",links:[gfg("quick-sort/1")]},
+    {t:"Recursive Bubble Sort",links:[gfg("recursive-bubble-sort/1")]},
+    {t:"Recursive Insertion Sort",links:[gfg("recursive-insertion-sort/1")]},
+  ]},
+]},
+{id:"p2",e:"📦",title:"Arrays",days:"Days 6–11",color:"#3b82f6",sections:[
+  {id:"s1",day:"Day 6–7",label:"Arrays Easy",tasks:[
+    {t:"Largest element in array",links:[gfg("largest-element-in-array4009/1")]},
+    {t:"Second largest element",links:[gfg("second-largest3735/1")]},
+    {t:"Check if array is sorted",links:[lc("check-if-array-is-sorted-and-rotated")]},
+    {t:"Remove duplicates from sorted array",links:[lc("remove-duplicates-from-sorted-array")]},
+    {t:"Left rotate array by one place",links:[gfg("cyclically-rotate-an-array-by-one2614/1")]},
+    {t:"Left rotate array by D places",links:[gfg("rotate-array-by-n-elements-1587115621/1")]},
+    {t:"Move zeros to end",links:[lc("move-zeroes")]},
+    {t:"Linear search",links:[gfg("who-will-win-1587115621/1")]},
+    {t:"Union of two sorted arrays",links:[gfg("union-of-two-sorted-arrays-1587115621/1")]},
+    {t:"Find missing number in array",links:[lc("missing-number")]},
+    {t:"Maximum consecutive ones",links:[lc("max-consecutive-ones")]},
+    {t:"Find number appearing once (others twice)",links:[lc("single-number")]},
+  ]},
+  {id:"s2",day:"Day 8–9",label:"Arrays Medium",tasks:[
+    {t:"2-Sum Problem",links:[lc("two-sum")]},
+    {t:"Sort 0s 1s 2s — Dutch National Flag",links:[lc("sort-colors")]},
+    {t:"Majority element >n/2 (Moore's Voting)",links:[lc("majority-element")]},
+    {t:"Kadane's algorithm — max subarray sum",links:[lc("maximum-subarray")]},
+    {t:"Print subarray with maximum sum",links:[lc("maximum-subarray")]},
+    {t:"Stock buy and sell",links:[lc("best-time-to-buy-and-sell-stock")]},
+    {t:"Rearrange alternating positive & negative",links:[lc("rearrange-array-elements-by-sign")]},
+    {t:"Next permutation",links:[lc("next-permutation")]},
+    {t:"Leaders in an array",links:[gfg("leaders-in-an-array-1587115620/1")]},
+    {t:"Longest consecutive sequence",links:[lc("longest-consecutive-sequence")]},
+    {t:"Set matrix zeros",links:[lc("set-matrix-zeroes")]},
+    {t:"Rotate image by 90 degrees",links:[lc("rotate-image")]},
+    {t:"Spiral traversal of matrix",links:[lc("spiral-matrix")]},
+  ]},
+  {id:"s3",day:"Day 10–11",label:"Arrays Hard",tasks:[
+    {t:"Pascal's triangle",links:[lc("pascals-triangle")]},
+    {t:"Majority element >n/3 times",links:[lc("majority-element-ii")]},
+    {t:"3-Sum problem",links:[lc("3sum")]},
+    {t:"4-Sum problem",links:[lc("4sum")]},
+    {t:"Largest subarray with 0 sum",links:[gfg("largest-subarray-with-0-sum/1")]},
+    {t:"Count subarrays with XOR = K",links:[gfg2("count-number-subarrays-given-xor/")]},
+    {t:"Merge overlapping subintervals",links:[lc("merge-intervals")]},
+    {t:"Merge two sorted arrays without extra space",links:[lc("merge-sorted-array")]},
+    {t:"Find repeating and missing numbers",links:[gfg("find-missing-and-repeating2512/1")]},
+    {t:"Count inversions",links:[gfg("inversion-of-array-1587115620/1")]},
+    {t:"Reverse pairs",links:[lc("reverse-pairs")]},
+    {t:"Maximum product subarray",links:[lc("maximum-product-subarray")]},
+  ]},
+]},
+{id:"p3",e:"🔍",title:"Binary Search",days:"Days 12–17",color:"#10b981",sections:[
+  {id:"s1",day:"Day 12–13",label:"BS on 1D Arrays",tasks:[
+    {t:"Binary search basics",links:[lc("binary-search")]},
+    {t:"Lower bound & upper bound",links:[lc("find-first-and-last-position-of-element-in-sorted-array")]},
+    {t:"First and last occurrence",links:[lc("find-first-and-last-position-of-element-in-sorted-array")]},
+    {t:"Count occurrences in sorted array",links:[gfg("number-of-occurrence2259/1")]},
+    {t:"Search in rotated sorted array I",links:[lc("search-in-rotated-sorted-array")]},
+    {t:"Search in rotated sorted array II duplicates",links:[lc("search-in-rotated-sorted-array-ii")]},
+    {t:"Find minimum in rotated sorted array",links:[lc("find-minimum-in-rotated-sorted-array")]},
+    {t:"Single element in sorted array",links:[lc("single-element-in-a-sorted-array")]},
+    {t:"Find peak element",links:[lc("find-peak-element")]},
+  ]},
+  {id:"s2",day:"Day 14",label:"BS on 2D Arrays",tasks:[
+    {t:"Row with maximum number of 1s",links:[gfg("row-with-max-1s0023/1")]},
+    {t:"Search in 2D matrix I",links:[lc("search-a-2d-matrix")]},
+    {t:"Search in 2D matrix II",links:[lc("search-a-2d-matrix-ii")]},
+    {t:"Peak element in 2D grid",links:[lc("find-a-peak-element-ii")]},
+    {t:"Median in row-wise sorted matrix",links:[gfg("median-in-a-row-wise-sorted-matrix1527/1")]},
+  ]},
+  {id:"s3",day:"Day 15–17",label:"BS on Answer / Search Space",tasks:[
+    {t:"Find Nth root of M",links:[gfg2("calculating-n-th-real-root-using-binary-search/")]},
+    {t:"Koko eating bananas",links:[lc("koko-eating-bananas")]},
+    {t:"Minimum days to make M bouquets",links:[lc("minimum-number-of-days-to-make-m-bouquets")]},
+    {t:"Find the smallest divisor",links:[lc("find-the-smallest-divisor-given-a-threshold")]},
+    {t:"Capacity to ship packages in D days",links:[lc("capacity-to-ship-packages-within-d-days")]},
+    {t:"Kth missing positive number",links:[lc("kth-missing-positive-number")]},
+    {t:"Aggressive cows",links:[gfg("aggressive-cows/1")]},
+    {t:"Book allocation problem",links:[gfg("allocate-minimum-number-of-pages0937/1")]},
+    {t:"Split array — largest sum",links:[lc("split-array-largest-sum")]},
+    {t:"Painter's partition problem",links:[gfg("the-painters-partition-problem1535/1")]},
+    {t:"Minimize max distance to gas stations",links:[lc("minimize-max-distance-to-gas-station")]},
+    {t:"Median of two sorted arrays",links:[lc("median-of-two-sorted-arrays")]},
+    {t:"Kth element of two sorted arrays",links:[gfg2("k-th-element-two-sorted-arrays/")]},
+  ]},
+]},
+{id:"p4",e:"📝",title:"Strings & Linked Lists",days:"Days 18–26",color:"#8b5cf6",sections:[
+  {id:"s1",day:"Day 18–20",label:"Strings Basic & Medium",tasks:[
+    {t:"Remove outermost parentheses",links:[lc("remove-outermost-parentheses")]},
+    {t:"Largest odd number in string",links:[lc("largest-odd-number-in-string")]},
+    {t:"Longest common prefix",links:[lc("longest-common-prefix")]},
+    {t:"Isomorphic strings",links:[lc("isomorphic-strings")]},
+    {t:"Rotate string",links:[lc("rotate-string")]},
+    {t:"Valid anagram",links:[lc("valid-anagram")]},
+    {t:"Check palindrome",links:[lc("valid-palindrome")]},
+    {t:"Implement atoi",links:[lc("string-to-integer-atoi")]},
+    {t:"Sort characters by frequency",links:[lc("sort-characters-by-frequency")]},
+    {t:"Longest palindromic substring",links:[lc("longest-palindromic-substring")]},
+    {t:"Reverse every word in string",links:[lc("reverse-words-in-a-string")]},
+    {t:"Count and Say",links:[lc("count-and-say")]},
+    {t:"Roman to Integer",links:[lc("roman-to-integer")]},
+  ]},
+  {id:"s2",day:"Day 21–22",label:"Linked List — Single LL",tasks:[
+    {t:"Introduction & creating linked list"},
+    {t:"Insert node in LL"},
+    {t:"Delete node in LL",links:[lc("delete-node-in-a-linked-list")]},
+    {t:"Find length of LL"},
+    {t:"Search element in LL"},
+    {t:"Find middle element slow-fast pointer",links:[lc("middle-of-the-linked-list")]},
+    {t:"Detect cycle in LL Floyd's algorithm",links:[lc("linked-list-cycle")]},
+    {t:"Find start of cycle",links:[lc("linked-list-cycle-ii")]},
+    {t:"Reverse a linked list",links:[lc("reverse-linked-list")]},
+    {t:"Check if LL is palindrome",links:[lc("palindrome-linked-list")]},
+    {t:"Odd-even linked list",links:[lc("odd-even-linked-list")]},
+    {t:"Remove Nth node from end",links:[lc("remove-nth-node-from-end-of-list")]},
+  ]},
+  {id:"s3",day:"Day 23–24",label:"Double LL & Medium LL",tasks:[
+    {t:"Introduction to DLL"},
+    {t:"Insert node in DLL"},
+    {t:"Delete node in DLL"},
+    {t:"Reverse a DLL"},
+    {t:"Delete all occurrences of key in DLL"},
+    {t:"Find pairs with given sum in DLL"},
+    {t:"Remove duplicates from sorted DLL",links:[lc("remove-duplicates-from-sorted-list")]},
+    {t:"Add two numbers as linked list",links:[lc("add-two-numbers")]},
+    {t:"Intersection of two linked lists",links:[lc("intersection-of-two-linked-lists")]},
+    {t:"Merge two sorted linked lists",links:[lc("merge-two-sorted-lists")]},
+  ]},
+  {id:"s4",day:"Day 25–26",label:"Linked List Hard",tasks:[
+    {t:"LRU Cache",links:[lc("lru-cache")]},
+    {t:"LFU Cache",links:[lc("lfu-cache")]},
+    {t:"Flatten a linked list",links:[gfg("flattening-a-linked-list/1")]},
+    {t:"Clone LL with random pointers",links:[lc("copy-list-with-random-pointer")]},
+    {t:"Merge K sorted linked lists",links:[lc("merge-k-sorted-lists")]},
+    {t:"Reverse LL in groups of K",links:[lc("reverse-nodes-in-k-group")]},
+    {t:"Rotate a linked list",links:[lc("rotate-list")]},
+  ]},
+]},
+{id:"p5",e:"🔄",title:"Recursion & Bit Manipulation",days:"Days 27–33",color:"#ec4899",sections:[
+  {id:"s1",day:"Day 27–28",label:"Recursion Basics & Subsequences",tasks:[
+    {t:"Print 1 to N and N to 1 using recursion"},
+    {t:"Sum of first N numbers"},
+    {t:"Factorial"},
+    {t:"Reverse array using recursion"},
+    {t:"Check palindrome using recursion",links:[lc("valid-palindrome")]},
+    {t:"Fibonacci",links:[lc("fibonacci-number")]},
+    {t:"Power(x,n) fast exponentiation",links:[lc("powx-n")]},
+    {t:"Generate all subsets / subsequences",links:[lc("subsets")]},
+    {t:"Subset sum — print all sums",links:[gfg("subset-sums2234/1")]},
+    {t:"Print subsequences with given sum"},
+  ]},
+  {id:"s2",day:"Day 29–30",label:"Backtracking",tasks:[
+    {t:"Combination Sum I",links:[lc("combination-sum")]},
+    {t:"Combination Sum II no duplicates",links:[lc("combination-sum-ii")]},
+    {t:"Subsets II with duplicate elements",links:[lc("subsets-ii")]},
+    {t:"Permutations I",links:[lc("permutations")]},
+    {t:"Permutations II with duplicates",links:[lc("permutations-ii")]},
+    {t:"N-Queens problem",links:[lc("n-queens")]},
+    {t:"M-coloring problem",links:[gfg("m-coloring-problem-1587115620/1")]},
+  ]},
+  {id:"s3",day:"Day 31",label:"Backtracking Hard",tasks:[
+    {t:"Sudoku solver",links:[lc("sudoku-solver")]},
+    {t:"Rat in a maze",links:[gfg("rat-in-a-maze-problem/1")]},
+    {t:"Word search",links:[lc("word-search")]},
+    {t:"Palindrome partitioning",links:[lc("palindrome-partitioning")]},
+    {t:"Letter combinations of phone number",links:[lc("letter-combinations-of-a-phone-number")]},
+  ]},
+  {id:"s4",day:"Day 32–33",label:"Bit Manipulation",tasks:[
+    {t:"All basic bit operations"},
+    {t:"Count set bits Brian Kernighan",links:[lc("number-of-1-bits")]},
+    {t:"Check Set Clear Toggle kth bit"},
+    {t:"Power of 2 check using bits",links:[lc("power-of-two")]},
+    {t:"Single number I",links:[lc("single-number")]},
+    {t:"Single number II",links:[lc("single-number-ii")]},
+    {t:"Single number III two non-repeating",links:[lc("single-number-iii")]},
+    {t:"XOR of all numbers 1 to N"},
+    {t:"Divide integers without division operator",links:[lc("divide-two-integers")]},
+    {t:"Reverse bits of integer",links:[lc("reverse-bits")]},
+    {t:"Number of 1 bits Hamming weight",links:[lc("number-of-1-bits")]},
+  ]},
+]},
+{id:"p6",e:"📚",title:"Stack, Queues & Sliding Window",days:"Days 34–42",color:"#f59e0b",sections:[
+  {id:"s1",day:"Day 34–35",label:"Stack & Queue Basics",tasks:[
+    {t:"Implement stack using arrays",links:[gfg("implement-stack-using-array/1")]},
+    {t:"Implement queue using arrays",links:[gfg("implement-queue-using-array/1")]},
+    {t:"Implement stack using linked list",links:[gfg("implement-stack-using-linked-list/1")]},
+    {t:"Implement queue using linked list",links:[gfg("implement-queue-using-linked-list/1")]},
+    {t:"Implement stack using queue",links:[lc("implement-stack-using-queues")]},
+    {t:"Implement queue using 2 stacks",links:[lc("implement-queue-using-stacks")]},
+    {t:"Valid parentheses",links:[lc("valid-parentheses")]},
+    {t:"Min stack",links:[lc("min-stack")]},
+    {t:"Next greater element I",links:[lc("next-greater-element-i")]},
+    {t:"Next greater element II circular",links:[lc("next-greater-element-ii")]},
+    {t:"Previous smaller element",links:[{t:LC,u:"https://www.interviewbit.com/problems/nearest-smaller-element/"}]},
+    {t:"Celebrity problem",links:[gfg("the-celebrity-problem-1587115621/1")]},
+  ]},
+  {id:"s2",day:"Day 36",label:"Expression Evaluation",tasks:[
+    {t:"Infix to postfix conversion",links:[gfg("infix-to-postfix-1587115620/1")]},
+    {t:"Infix to prefix conversion",links:[gfg("infix-to-prefix-conversion/1")]},
+    {t:"Evaluate postfix expression",links:[gfg("evaluation-of-postfix-expression1735/1")]},
+    {t:"Evaluate prefix expression"},
+    {t:"Asteroid collision",links:[lc("asteroid-collision")]},
+    {t:"Decode string",links:[lc("decode-string")]},
+    {t:"Remove K digits to get smallest number",links:[lc("remove-k-digits")]},
+  ]},
+  {id:"s3",day:"Day 37–38",label:"Monotonic Stack Hard",tasks:[
+    {t:"Sum of subarray minimums",links:[lc("sum-of-subarray-minimums")]},
+    {t:"Sum of subarray ranges",links:[lc("sum-of-subarray-ranges")]},
+    {t:"Largest rectangle in histogram",links:[lc("largest-rectangle-in-histogram")]},
+    {t:"Maximal rectangle in binary matrix",links:[lc("maximal-rectangle")]},
+    {t:"Trapping rain water",links:[lc("trapping-rain-water")]},
+    {t:"132 pattern",links:[lc("132-pattern")]},
+  ]},
+  {id:"s4",day:"Day 39–40",label:"Sliding Window",tasks:[
+    {t:"Sliding window and two pointer templates"},
+    {t:"Max sum subarray of size K",links:[gfg("max-sum-subarray-of-size-k5313/1")]},
+    {t:"First negative in every window of K",links:[gfg("first-negative-integer-in-every-window-of-size-k3345/1")]},
+    {t:"Count occurrences of anagram",links:[gfg("count-occurences-of-anagrams5839/1")]},
+    {t:"Fruits into baskets",links:[lc("fruit-into-baskets")]},
+    {t:"Longest substring without repeating characters",links:[lc("longest-substring-without-repeating-characters")]},
+    {t:"Longest repeating character replacement",links:[lc("longest-repeating-character-replacement")]},
+    {t:"Binary subarray with sum",links:[lc("binary-subarrays-with-sum")]},
+  ]},
+  {id:"s5",day:"Day 41–42",label:"SW + Two Pointer Hard",tasks:[
+    {t:"Minimum window substring",links:[lc("minimum-window-substring")]},
+    {t:"Max consecutive 1s III",links:[lc("max-consecutive-ones-iii")]},
+    {t:"Subarray product less than K",links:[lc("subarray-product-less-than-k")]},
+    {t:"3-Sum two pointer",links:[lc("3sum")]},
+    {t:"Container with most water",links:[lc("container-with-most-water")]},
+    {t:"Trapping rain water two pointer",links:[lc("trapping-rain-water")]},
+  ]},
+]},
+{id:"p7",e:"⛰️",title:"Heaps & Greedy",days:"Days 43–47",color:"#84cc16",sections:[
+  {id:"s1",day:"Day 43–44",label:"Heaps",tasks:[
+    {t:"Implement min heap from scratch"},
+    {t:"Implement max heap from scratch"},
+    {t:"Heapify operation"},
+    {t:"Kth largest element",links:[lc("kth-largest-element-in-an-array")]},
+    {t:"Kth smallest element",links:[lc("kth-smallest-element-in-a-sorted-matrix")]},
+    {t:"Sort K-sorted array",links:[gfg("nearly-sorted-1587115620/1")]},
+    {t:"K most frequent elements",links:[lc("top-k-frequent-elements")]},
+    {t:"Find median from data stream",links:[lc("find-median-from-data-stream")]},
+  ]},
+  {id:"s2",day:"Day 45",label:"Heaps Hard",tasks:[
+    {t:"Merge K sorted linked lists",links:[lc("merge-k-sorted-lists")]},
+    {t:"Smallest range covering K lists",links:[lc("smallest-range-covering-elements-from-k-lists")]},
+    {t:"Task scheduler",links:[lc("task-scheduler")]},
+    {t:"IPO capital problem",links:[lc("ipo")]},
+    {t:"Minimum cost of connecting ropes",links:[gfg("minimum-cost-of-ropes-1587115620/1")]},
+  ]},
+  {id:"s3",day:"Day 46–47",label:"Greedy Algorithms",tasks:[
+    {t:"Assign cookies",links:[lc("assign-cookies")]},
+    {t:"Fractional knapsack",links:[gfg("fractional-knapsack-1587115620/1")]},
+    {t:"Jump game I",links:[lc("jump-game")]},
+    {t:"Jump game II minimum jumps",links:[lc("jump-game-ii")]},
+    {t:"N meetings in one room",links:[gfg("n-meetings-in-one-room-1587115620/1")]},
+    {t:"Minimum number of platforms",links:[gfg("minimum-platforms-1587115620/1")]},
+    {t:"Job sequencing problem",links:[gfg("job-sequencing-problem-1587115620/1")]},
+    {t:"Candy distribution",links:[lc("candy")]},
+    {t:"Insert interval",links:[lc("insert-interval")]},
+    {t:"Non-overlapping intervals",links:[lc("non-overlapping-intervals")]},
+    {t:"Min arrows to burst balloons",links:[lc("minimum-number-of-arrows-to-burst-balloons")]},
+  ]},
+]},
+{id:"p8",e:"🌳",title:"Binary Trees & BST",days:"Days 48–54",color:"#ef4444",sections:[
+  {id:"s1",day:"Day 48",label:"BT Traversals",tasks:[
+    {t:"BT representation & creation"},
+    {t:"Recursive inorder traversal",links:[lc("binary-tree-inorder-traversal")]},
+    {t:"Recursive preorder traversal",links:[lc("binary-tree-preorder-traversal")]},
+    {t:"Recursive postorder traversal",links:[lc("binary-tree-postorder-traversal")]},
+    {t:"Iterative inorder traversal",links:[lc("binary-tree-inorder-traversal")]},
+    {t:"Iterative preorder traversal",links:[lc("binary-tree-preorder-traversal")]},
+    {t:"Iterative postorder 2 stacks",links:[lc("binary-tree-postorder-traversal")]},
+    {t:"Iterative postorder 1 stack",links:[lc("binary-tree-postorder-traversal")]},
+    {t:"Level order traversal BFS",links:[lc("binary-tree-level-order-traversal")]},
+    {t:"Level order II bottom-up",links:[lc("binary-tree-level-order-traversal-ii")]},
+    {t:"Zigzag level order",links:[lc("binary-tree-zigzag-level-order-traversal")]},
+  ]},
+  {id:"s2",day:"Day 49–50",label:"Binary Tree Medium",tasks:[
+    {t:"Height / maximum depth",links:[lc("maximum-depth-of-binary-tree")]},
+    {t:"Diameter of binary tree",links:[lc("diameter-of-binary-tree")]},
+    {t:"Check if balanced",links:[lc("balanced-binary-tree")]},
+    {t:"Maximum width of BT",links:[lc("maximum-width-of-binary-tree")]},
+    {t:"Boundary traversal",links:[gfg("boundary-traversal-of-binary-tree/1")]},
+    {t:"Vertical order traversal",links:[lc("vertical-order-traversal-of-a-binary-tree")]},
+    {t:"Top view of binary tree",links:[gfg("top-view-of-binary-tree/1")]},
+    {t:"Bottom view of binary tree",links:[gfg("bottom-view-of-binary-tree/1")]},
+    {t:"Left view of binary tree",links:[gfg("left-view-of-binary-tree/1")]},
+    {t:"Right view of binary tree",links:[lc("binary-tree-right-side-view")]},
+    {t:"Symmetric tree",links:[lc("symmetric-tree")]},
+    {t:"Sum on longest path root to leaf",links:[gfg("sum-of-the-longest-bloodline-of-a-tree-1587115621/1")]},
+  ]},
+  {id:"s3",day:"Day 51–52",label:"Binary Tree Hard",tasks:[
+    {t:"Flatten BT to linked list",links:[lc("flatten-binary-tree-to-linked-list")]},
+    {t:"Maximum path sum",links:[lc("binary-tree-maximum-path-sum")]},
+    {t:"LCA of two nodes",links:[lc("lowest-common-ancestor-of-a-binary-tree")]},
+    {t:"Morris inorder traversal",links:[lc("binary-tree-inorder-traversal")]},
+    {t:"Morris preorder traversal",links:[lc("binary-tree-preorder-traversal")]},
+    {t:"Construct BT from preorder + inorder",links:[lc("construct-binary-tree-from-preorder-and-inorder-traversal")]},
+    {t:"Construct BT from postorder + inorder",links:[lc("construct-binary-tree-from-inorder-and-postorder-traversal")]},
+    {t:"Serialize and deserialize BT",links:[lc("serialize-and-deserialize-binary-tree")]},
+    {t:"Count nodes in complete BT",links:[lc("count-complete-tree-nodes")]},
+  ]},
+  {id:"s4",day:"Day 53–54",label:"Binary Search Tree",tasks:[
+    {t:"Search in BST",links:[lc("search-in-a-binary-search-tree")]},
+    {t:"Floor in BST",links:[gfg("floor-in-bst/1")]},
+    {t:"Ceil in BST",links:[gfg("ceil-in-bst/1")]},
+    {t:"Insert node in BST",links:[lc("insert-into-a-binary-search-tree")]},
+    {t:"Delete node in BST",links:[lc("delete-node-in-a-bst")]},
+    {t:"Kth smallest in BST",links:[lc("kth-smallest-element-in-a-bst")]},
+    {t:"Kth largest in BST",links:[gfg("kth-largest-element-in-bst/1")]},
+    {t:"Validate BST",links:[lc("validate-binary-search-tree")]},
+    {t:"LCA in BST",links:[lc("lowest-common-ancestor-of-a-binary-search-tree")]},
+    {t:"Construct BST from preorder",links:[lc("construct-binary-search-tree-from-preorder-traversal")]},
+    {t:"Inorder successor / predecessor",links:[gfg("predecessor-and-successor/1")]},
+    {t:"Merge two BSTs",links:[gfg("merge-two-bst-s/1")]},
+    {t:"Two-sum in BST",links:[lc("two-sum-iv-input-is-a-bst")]},
+    {t:"Recover BST two nodes swapped",links:[lc("recover-binary-search-tree")]},
+    {t:"Largest BST in binary tree",links:[gfg("largest-bst/1")]},
+  ]},
+]},
+{id:"p9",e:"🕸️",title:"Graphs",days:"Days 55–60",color:"#06b6d4",sections:[
+  {id:"s1",day:"Day 55",label:"Graph Basics + BFS + DFS",tasks:[
+    {t:"Adjacency list & matrix representation"},
+    {t:"BFS traversal",links:[gfg("bfs-traversal-of-graph/1")]},
+    {t:"DFS traversal",links:[gfg("depth-first-traversal-for-a-graph/1")]},
+    {t:"Flood fill algorithm",links:[lc("flood-fill")]},
+    {t:"Rotten oranges",links:[lc("rotting-oranges")]},
+    {t:"Number of islands",links:[lc("number-of-islands")]},
+    {t:"01 matrix nearest 0",links:[lc("01-matrix")]},
+    {t:"Distance of nearest cell having 1",links:[gfg("distance-of-nearest-cell-having-11/1")]},
+  ]},
+  {id:"s2",day:"Day 56",label:"Cycle Detection + Bipartite",tasks:[
+    {t:"Cycle in undirected graph BFS",links:[gfg("detect-cycle-in-an-undirected-graph/1")]},
+    {t:"Cycle in undirected graph DFS",links:[gfg("detect-cycle-in-an-undirected-graph/1")]},
+    {t:"Cycle in directed graph DFS",links:[gfg("detect-cycle-in-a-directed-graph/1")]},
+    {t:"Cycle in directed graph BFS Kahn",links:[gfg("detect-cycle-in-a-directed-graph/1")]},
+    {t:"Bipartite check BFS",links:[lc("is-graph-bipartite")]},
+    {t:"Bipartite check DFS",links:[lc("is-graph-bipartite")]},
+    {t:"Eventual safe states",links:[lc("find-eventual-safe-states")]},
+  ]},
+  {id:"s3",day:"Day 57",label:"Topological Sort",tasks:[
+    {t:"Topo Sort DFS approach",links:[gfg("topological-sort/1")]},
+    {t:"Topo Sort Kahn's algorithm BFS",links:[gfg("topological-sort/1")]},
+    {t:"Course schedule I",links:[lc("course-schedule")]},
+    {t:"Course schedule II",links:[lc("course-schedule-ii")]},
+    {t:"Eventual safe states directed",links:[lc("find-eventual-safe-states")]},
+    {t:"Alien dictionary",links:[lc("alien-dictionary")]},
+    {t:"Shortest path in DAG",links:[gfg("shortest-path-in-undirected-graph/1")]},
+  ]},
+  {id:"s4",day:"Day 58–59",label:"Shortest Path Algorithms",tasks:[
+    {t:"Shortest path in undirected graph BFS",links:[gfg("shortest-path-in-undirected-graph/1")]},
+    {t:"Dijkstra's priority queue",links:[gfg("implementing-dijkstra-set-1-adjacency-matrix/1")]},
+    {t:"Dijkstra's set approach",links:[gfg("implementing-dijkstra-set-1-adjacency-matrix/1")]},
+    {t:"Bellman-Ford algorithm",links:[gfg("bellman-ford-1587115620/1")]},
+    {t:"Floyd-Warshall algorithm",links:[gfg("implementing-floyd-warshall2042/1")]},
+    {t:"Network delay time",links:[lc("network-delay-time")]},
+    {t:"Path with minimum effort",links:[lc("path-with-minimum-effort")]},
+    {t:"Cheapest flights within K stops",links:[lc("cheapest-flights-within-k-stops")]},
+    {t:"Number of ways to arrive at destination",links:[lc("number-of-ways-to-arrive-at-destination")]},
+    {t:"Minimum multiplications to reach end",links:[gfg("minimum-multiplications-to-reach-end/1")]},
+  ]},
+  {id:"s5",day:"Day 60 🏁",label:"MST + DSU + Advanced",tasks:[
+    {t:"DSU with path compression",links:[gfg("disjoint-set-union-find/1")]},
+    {t:"DSU with union by rank/size",links:[gfg("disjoint-set-union-find/1")]},
+    {t:"Kruskal's algorithm MST",links:[gfg("minimum-spanning-tree/1")]},
+    {t:"Prim's algorithm MST",links:[gfg("minimum-spanning-tree/1")]},
+    {t:"Number of provinces",links:[lc("number-of-provinces")]},
+    {t:"Accounts merge",links:[lc("accounts-merge")]},
+    {t:"Making a large island",links:[lc("making-a-large-island")]},
+    {t:"Swim in rising water",links:[lc("swim-in-rising-water")]},
+    {t:"Bridges in graph Tarjan",links:[lc("critical-connections-in-a-network")]},
+    {t:"Kosaraju's SCC algorithm",links:[gfg("strongly-connected-components-tarjanss-algo-1587115621/1")]},
+    {t:"Number of strongly connected components",links:[gfg("number-of-strongly-connected-components/1")]},
+  ]},
+]},
+{id:"p10",e:"🧠",title:"DP + Tries + Advanced Strings",days:"Bonus: Days 61–68",color:"#a855f7",bonus:true,sections:[
+  {id:"s1",day:"Day 61–62",label:"1D & 2D Dynamic Programming",tasks:[
+    {t:"Fibonacci memoization + tabulation",links:[lc("fibonacci-number")]},
+    {t:"Climbing stairs",links:[lc("climbing-stairs")]},
+    {t:"Frog jump 1D DP",links:[gfg("geek-jump/1")]},
+    {t:"Frog jump with K distances"},
+    {t:"House robber I",links:[lc("house-robber")]},
+    {t:"House robber II circular",links:[lc("house-robber-ii")]},
+    {t:"Unique paths I",links:[lc("unique-paths")]},
+    {t:"Unique paths II with obstacles",links:[lc("unique-paths-ii")]},
+    {t:"Min path sum in grid",links:[lc("minimum-path-sum")]},
+    {t:"Triangle min path sum",links:[lc("triangle")]},
+    {t:"Maximum falling path sum",links:[lc("maximum-falling-path-sum")]},
+    {t:"Chocolate pickup 3D DP",links:[gfg("chocolate-pickup/1")]},
+  ]},
+  {id:"s2",day:"Day 63–64",label:"DP on Subsequences / Knapsack",tasks:[
+    {t:"Subset sum equals K",links:[gfg("subset-sum-problem-1611555638/1")]},
+    {t:"Partition equal subset sum",links:[lc("partition-equal-subset-sum")]},
+    {t:"Partition into 2 subsets min abs diff",links:[lc("last-stone-weight-ii")]},
+    {t:"Count subsets with sum K",links:[gfg("perfect-sum-problem5633/1")]},
+    {t:"0/1 Knapsack",links:[gfg("0-1-knapsack-problem/1")]},
+    {t:"Coin change I minimum coins",links:[lc("coin-change")]},
+    {t:"Coin change II number of ways",links:[lc("coin-change-ii")]},
+    {t:"Unbounded knapsack",links:[gfg("knapsack-with-duplicate-items4201/1")]},
+    {t:"Rod cutting problem",links:[gfg("rod-cutting0840/1")]},
+    {t:"Target sum assignment",links:[lc("target-sum")]},
+    {t:"Last stone weight II",links:[lc("last-stone-weight-ii")]},
+  ]},
+  {id:"s3",day:"Day 65–66",label:"DP on Strings + Stocks + LIS",tasks:[
+    {t:"LCS longest common subsequence",links:[lc("longest-common-subsequence")]},
+    {t:"Print LCS",links:[gfg("print-all-lcs-sequences3413/1")]},
+    {t:"Longest common substring",links:[gfg("longest-common-substring1452/1")]},
+    {t:"Longest palindromic subsequence",links:[lc("longest-palindromic-subsequence")]},
+    {t:"Min insertions to make palindrome",links:[lc("minimum-insertion-steps-to-make-a-string-palindrome")]},
+    {t:"Min insertions/deletions to convert string",links:[lc("delete-operation-for-two-strings")]},
+    {t:"Shortest common supersequence",links:[lc("shortest-common-supersequence")]},
+    {t:"Edit distance",links:[lc("edit-distance")]},
+    {t:"Wildcard matching",links:[lc("wildcard-matching")]},
+    {t:"Stock buy sell I 1 transaction",links:[lc("best-time-to-buy-and-sell-stock")]},
+    {t:"Stock buy sell II unlimited",links:[lc("best-time-to-buy-and-sell-stock-ii")]},
+    {t:"Stock buy sell III at most 2",links:[lc("best-time-to-buy-and-sell-stock-iii")]},
+    {t:"Stock buy sell IV at most K",links:[lc("best-time-to-buy-and-sell-stock-iv")]},
+    {t:"Stock with cooldown",links:[lc("best-time-to-buy-and-sell-stock-with-cooldown")]},
+    {t:"Stock with transaction fee",links:[lc("best-time-to-buy-and-sell-stock-with-transaction-fee")]},
+    {t:"LIS longest increasing subsequence",links:[lc("longest-increasing-subsequence")]},
+    {t:"LIS with binary search nlogn",links:[lc("longest-increasing-subsequence")]},
+    {t:"Largest divisible subset",links:[lc("largest-divisible-subset")]},
+    {t:"Longest string chain",links:[lc("longest-string-chain")]},
+    {t:"Longest bitonic subsequence",links:[gfg("longest-bitonic-subsequence0824/1")]},
+  ]},
+  {id:"s4",day:"Day 67",label:"DP Hard + Tries",tasks:[
+    {t:"Matrix chain multiplication",links:[gfg("matrix-chain-multiplication0303/1")]},
+    {t:"Minimum cost to cut a stick",links:[lc("minimum-cost-to-cut-a-stick")]},
+    {t:"Burst balloons",links:[lc("burst-balloons")]},
+    {t:"Evaluate boolean expression to true",links:[gfg("boolean-parenthesization5610/1")]},
+    {t:"Palindrome partitioning II",links:[lc("palindrome-partitioning-ii")]},
+    {t:"Partition array for max sum",links:[lc("partition-array-for-maximum-sum")]},
+    {t:"Implement Trie insert search startsWith",links:[lc("implement-trie-prefix-tree")]},
+    {t:"Implement Trie II",links:[gfg("trie-insert-and-search0651/1")]},
+    {t:"Count distinct substrings using Trie"},
+    {t:"Max XOR of two numbers using Trie",links:[lc("maximum-xor-of-two-numbers-in-an-array")]},
+    {t:"Max XOR with element from array",links:[lc("maximum-xor-with-an-element-from-array")]},
+  ]},
+  {id:"s5",day:"Day 68 🎉",label:"Advanced String Matching",tasks:[
+    {t:"KMP algorithm failure function",links:[lc("find-the-index-of-the-first-occurrence-in-a-string")]},
+    {t:"KMP search pattern in text",links:[lc("find-the-index-of-the-first-occurrence-in-a-string")]},
+    {t:"Z-algorithm",links:[gfg2("z-algorithm-linear-time-pattern-searching-algorithm/")]},
+    {t:"Rabin-Karp string hashing",links:[gfg2("rabin-karp-algorithm-for-pattern-searching/")]},
+    {t:"Shortest palindrome using KMP",links:[lc("shortest-palindrome")]},
+    {t:"Longest happy prefix",links:[lc("longest-happy-prefix")]},
+    {t:"Count occurrences of pattern in text",links:[gfg("count-occurrences-of-a-word-in-text3348/1")]},
+    {t:"Min chars to add for palindrome",links:[gfg2("minimum-characters-added-front-make-string-palindrome/")]},
+    {t:"Count distinct substrings via hashing"},
+  ]},
+]},
+];
+
+const KEY="dsa_v5";
+let checked={},filter="all",saveTimer=null;
+try{const s=localStorage.getItem(KEY);if(s)checked=JSON.parse(s);}catch{}
+
+function save(){
+  try{localStorage.setItem(KEY,JSON.stringify(checked));}catch{}
+  const d=document.getElementById("saveDot");
+  d.textContent="● saving...";d.classList.add("live");
+  clearTimeout(saveTimer);
+  saveTimer=setTimeout(()=>{d.textContent="● saved";d.classList.remove("live");},700);
+}
+
+function tk(p,s,i){return p+"-"+s+"-"+i}
+
+function updateGlobal(){
+  let t=0,d=0;
+  PHASES.forEach(p=>p.sections.forEach(s=>s.tasks.forEach((_,i)=>{t++;if(checked[tk(p.id,s.id,i)])d++;})));
+  const pct=t?Math.round(d/t*100):0;
+  document.getElementById("gPct").textContent=pct+"%";
+  document.getElementById("gSub").textContent=d+" / "+t+" tasks";
+  document.getElementById("gBar").style.width=pct+"%";
+}
+
+function updatePhaseBar(pid){
+  const ph=PHASES.find(p=>p.id===pid);
+  let t=0,d=0;
+  ph.sections.forEach(s=>s.tasks.forEach((_,i)=>{t++;if(checked[tk(pid,s.id,i)])d++;}));
+  const pct=t?Math.round(d/t*100):0;
+  const f=document.querySelector('[data-phase="'+pid+'"] .phase-bar-fill');
+  const pe=document.querySelector('[data-phase="'+pid+'"] .phase-pct');
+  const m=document.querySelector('[data-phase="'+pid+'"] .phase-meta');
+  if(f)f.style.width=pct+"%";
+  if(pe)pe.textContent=pct+"%";
+  if(m)m.textContent=ph.days+" · "+d+"/"+t+" tasks";
+}
+
+function updateSecCheck(pid,sid){
+  const ph=PHASES.find(p=>p.id===pid);
+  const sec=ph.sections.find(s=>s.id===sid);
+  const done=sec.tasks.every((_,i)=>checked[tk(pid,sid,i)]);
+  const el=document.querySelector('[data-sec="'+pid+"-"+sid+'"] .sec-check');
+  if(el){el.classList.toggle("done",done);el.textContent=done?"✓":"";}
+  const cnt=document.querySelector('[data-sec="'+pid+"-"+sid+'"] .sec-count');
+  if(cnt){const d=sec.tasks.filter((_,i)=>checked[tk(pid,sid,i)]).length;cnt.textContent=d+"/"+sec.tasks.length;}
+}
+
+function badge(links){
+  if(!links||!links.length)return"";
+  return'<span class="task-links" onclick="event.stopPropagation()">'+links.map(l=>'<a class="'+(l.t===LC?"lc-badge":"gfg-badge")+'" href="'+l.u+'" target="_blank" rel="noopener">'+(l.t===LC?"LC":"GFG")+'</a>').join("")+'</span>';
+}
+
+function renderTasks(pid,sid,container){
+  const ph=PHASES.find(p=>p.id===pid);
+  const sec=ph.sections.find(s=>s.id===sid);
+  container.innerHTML="";
+  const vis=sec.tasks.map((task,i)=>{
+    const k=tk(pid,sid,i),isDone=!!checked[k];
+    if(filter==="done"&&!isDone)return null;
+    if(filter==="pending"&&isDone)return null;
+    return{task,i,isDone,k};
+  }).filter(Boolean);
+  if(!vis.length){
+    const em=document.createElement("div");em.className="empty-msg";
+    em.textContent=filter==="done"?"No completed tasks yet.":"All done in this section! 🎉";
+    container.appendChild(em);return;
+  }
+  vis.forEach(({task,i,isDone,k})=>{
+    const row=document.createElement("div");
+    row.className="task"+(isDone?" done":"");
+    row.innerHTML='<div class="task-box">'+(isDone?"✓":"")+'</div><div class="task-body"><span class="task-txt">'+task.t+'</span>'+badge(task.links)+'</div>';
+    row.addEventListener("click",()=>{
+      checked[k]=!checked[k];save();
+      updateGlobal();updatePhaseBar(pid);updateSecCheck(pid,sid);
+      renderTasks(pid,sid,container);
+    });
+    container.appendChild(row);
+  });
+}
+
+function buildUI(){
+  const main=document.getElementById("main");main.innerHTML="";
+  PHASES.forEach((phase)=>{
+    const card=document.createElement("div");
+    card.className="phase";card.dataset.phase=phase.id;
+    card.style.setProperty("--phase-color",phase.color);
+    let t=0,d=0;
+    phase.sections.forEach(s=>s.tasks.forEach((_,i)=>{t++;if(checked[tk(phase.id,s.id,i)])d++;}));
+    const pct=t?Math.round(d/t*100):0;
+    const hdr=document.createElement("div");hdr.className="phase-hdr";
+    hdr.innerHTML='<div class="phase-emoji">'+phase.e+'</div><div class="phase-info"><div class="phase-name">'+phase.title+(phase.bonus?'<span class="bonus-badge">BONUS</span>':'')+'</div><div class="phase-meta">'+phase.days+' · '+d+'/'+t+' tasks</div></div><div class="phase-right"><div class="phase-bar-wrap"><div class="phase-bar-fill" style="width:'+pct+'%"></div></div><div class="phase-pct">'+pct+'%</div><div class="phase-chev">▾</div></div>';
+    card.appendChild(hdr);
+    const secs=document.createElement("div");secs.className="sections";
+    phase.sections.forEach((sec)=>{
+      const allDone=sec.tasks.every((_,i)=>checked[tk(phase.id,sec.id,i)]);
+      const sDone=sec.tasks.filter((_,i)=>checked[tk(phase.id,sec.id,i)]).length;
+      const secDiv=document.createElement("div");secDiv.className="section";secDiv.dataset.sec=phase.id+"-"+sec.id;
+      const secHdr=document.createElement("div");secHdr.className="sec-hdr";
+      secHdr.innerHTML='<div class="sec-check '+(allDone?"done":"")+'">'+( allDone?"✓":"")+'</div><div class="sec-info"><span class="sec-day">'+sec.day+'</span><span class="sec-label">'+sec.label+'</span></div><span class="sec-count">'+sDone+'/'+sec.tasks.length+'</span><span class="sec-chev">▾</span>';
+      const taskDiv=document.createElement("div");taskDiv.className="tasks";
+      secHdr.addEventListener("click",()=>{
+        const open=secHdr.classList.toggle("open");
+        taskDiv.classList.toggle("open",open);
+        if(open)renderTasks(phase.id,sec.id,taskDiv);
+      });
+      secDiv.appendChild(secHdr);secDiv.appendChild(taskDiv);secs.appendChild(secDiv);
+    });
+    hdr.addEventListener("click",()=>{
+      const open=card.classList.toggle("open");
+      if(open){
+        const fsh=secs.querySelector(".sec-hdr"),ftd=secs.querySelector(".tasks");
+        if(fsh&&!fsh.classList.contains("open")){fsh.classList.add("open");ftd.classList.add("open");renderTasks(phase.id,phase.sections[0].id,ftd);}
+      }
+    });
+    card.appendChild(secs);main.appendChild(card);
+  });
+  const total=PHASES.flatMap(p=>p.sections.flatMap(s=>s.tasks)).length;
+  main.insertAdjacentHTML("beforeend","<footer>STRIVER A2Z DSA · "+total+" TASKS · LC = LEETCODE · GFG = GEEKSFORGEEKS · SAVED TO BROWSER</footer>");
+}
+
+document.querySelectorAll(".filter-btn").forEach(btn=>{
+  btn.addEventListener("click",()=>{
+    filter=btn.dataset.f;
+    document.querySelectorAll(".filter-btn").forEach(b=>b.classList.remove("active"));
+    btn.classList.add("active");
+    document.querySelectorAll(".tasks.open").forEach(td=>{
+      const key=td.closest(".section").dataset.sec;
+      const m=key.match(/^(p\d+)-(s\d+)$/);
+      if(m)renderTasks(m[1],m[2],td);
+    });
+  });
+});
+buildUI();updateGlobal();
+</script>
+</body>
+</html>
